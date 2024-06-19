@@ -47,6 +47,27 @@ filter_args() {
 # 功能函数
 ############################################
 
+SKIP_COMMENTS=1
+validate_repo_dir_one() {
+    local dir=$1
+
+    if [[ "$dir" = "" ]]; then
+        export SKIP_COMMENTS=0
+        continue
+    fi
+    if [[ "$dir" = "#"* ]]; then
+        if [[ "$SKIP_COMMENTS" != "1" ]]; then
+            log_warn "Skip directory" "$(trim_begin "$dir")"
+        fi
+        continue
+    fi
+
+    if [[ ! -d "$_REPO_DIR/$dir" ]]; then
+        log_err "The directory does not exist" $(realpath "$_REPO_DIR/$dir")
+        exit 1
+    fi
+}
+
 validate_repo_dir() {
     log_verbose "Starting to validate the repository directory" "$_REPO_DIR"
 
@@ -56,19 +77,17 @@ validate_repo_dir() {
     fi
 
     while IFS= read -r dir; do
-        if [[ "$dir" = "" ]]; then
-            continue
-        fi
-        if [[ "$dir" = "#"* ]]; then
-            log_warn "Skip directory" "$(trim_begin "$dir")"
-            continue
-        fi
-
-        if [[ ! -d "$_REPO_DIR/$dir" ]]; then
-            log_err "The directory does not exist" $(realpath "$_REPO_DIR/$dir")
-            exit 1
-        fi
+        validate_repo_dir_one "$dir"
     done < $_REPO_DIR/bin/repo.txt
+
+    if [[ -d "$_REPO_DIR/bin/repo.d" ]]; then
+        for file in $_REPO_DIR/bin/repo.d/*.txt; do
+            while IFS= read -r dir; do
+                validate_repo_dir_one "$dir"
+            done < $file
+        done
+    fi
+
     log_verbose "The repository directory is valid" "$_REPO_DIR"
 }
 

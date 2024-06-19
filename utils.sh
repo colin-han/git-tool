@@ -4,7 +4,7 @@
 
 _REPO_DIR="$(dirname $(dirname $(realpath $0)))"
 _COLOR_NORMAL="\033[0m"
-_COLOR_TIP="\033[1,30m"
+_COLOR_TIP="\033[0;37m"
 _COLOR_INFO="\033[32m"
 _COLOR_WARN="\033[33m"
 _COLOR_ERR="\033[31m"
