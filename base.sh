@@ -51,14 +51,15 @@ SKIP_COMMENTS=1
 validate_repo_dir_one() {
     local dir=$1
 
-    if [[ "$dir" = "" ]]; then
-        export SKIP_COMMENTS=0
-        continue
-    fi
     if [[ "$dir" = "#"* ]]; then
         if [[ "$SKIP_COMMENTS" != "1" ]]; then
             log_warn "Skip directory" "$(trim_begin "$dir")"
         fi
+        continue
+    fi
+
+    export SKIP_COMMENTS=0
+    if [[ "$dir" = "" ]]; then
         continue
     fi
 
